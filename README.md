@@ -1,27 +1,21 @@
-# Weather Lookup (Open‑Meteo)
+# City Weather (Open-Meteo)
 
 ## Overview
-A minimal single-page app to fetch current temperature and humidity for any city using the Open‑Meteo public APIs (no API key required). Built with Bootstrap 5.
+A minimal, client-side web page that fetches the current temperature and humidity for a city using the Open-Meteo Geocoding API and Forecast API. No API key required. Styled with Bootstrap 5.
 
 ## Setup
-- Download index.html and open it in any modern web browser.
-- Requires internet access to call Open‑Meteo APIs and load Bootstrap from CDN.
-- Optional: host as static site on any web server.
+- No build or server required.
+- Open index.html in any modern browser.
 
 ## Usage
-- Enter a city name (e.g., “Paris” or “San Francisco”).
-- Click “Get Weather”.
-- The page will show:
-  - Current temperature (°C)
-  - Current relative humidity (%)
-  - The matched location and observation time
-
-Tip: If the city isn’t found, try including the country or region (e.g., “Springfield, US”).
+- Enter a city name (optionally include country or state, e.g., “Portland, US”).
+- Click “Get Weather” or press Enter.
+- The page displays current temperature (°C) and relative humidity (%).
 
 ## License
 MIT License
 
-Copyright (c) 2025 Weather Lookup Demo Authors
+Copyright (c) 2025
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
