@@ -1,161 +1,478 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
+  <title>Weather Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>City Weather - Open-Meteo Demo</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
   <style>
-    body { background-color: #f8f9fa; }
-    .brand { letter-spacing: 0.3px; }
+    :root{
+      --bg:#0f172a;
+      --card:#111827;
+      --accent:#38bdf8;
+      --muted:#94a3b8;
+      --text:#e5e7eb;
+      --good:#22c55e;
+      --bad:#ef4444;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,"Helvetica Neue",Arial;
+      background: radial-gradient(1200px 600px at 20% -10%, #1f2937, transparent),
+                  radial-gradient(1000px 500px at 120% 0%, #0b2534, transparent),
+                  var(--bg);
+      color:var(--text);
+      min-height:100vh;
+    }
+    .container{
+      max-width:900px;
+      margin: 24px auto;
+      padding: 0 16px 48px;
+    }
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:16px;
+    }
+    .brand{
+      font-weight:700;
+      letter-spacing:.3px;
+      display:flex; align-items:center; gap:10px;
+    }
+    .brand .logo{
+      width:28px; height:28px; display:inline-grid; place-items:center;
+      background: linear-gradient(135deg, #22d3ee, #3b82f6);
+      color:white; border-radius:8px; font-weight:900;
+      box-shadow:0 6px 20px rgba(56,189,248,.35);
+    }
+    .controls{
+      display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;
+    }
+    .search{
+      display:flex; gap:8px; align-items:center;
+      background:rgba(255,255,255,.04);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:12px; padding:8px;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.02);
+    }
+    .search input{
+      background:transparent; border:0; outline:0; color:var(--text);
+      width:220px; max-width:50vw; font-size:15px;
+    }
+    .btn{
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.1);
+      color:var(--text);
+      padding:8px 12px; border-radius:10px;
+      cursor:pointer; font-weight:600; font-size:14px;
+      transition:.15s ease;
+    }
+    .btn:hover{ transform:translateY(-1px); background:rgba(255,255,255,.1) }
+    .btn.accent{ background:linear-gradient(135deg,#38bdf8,#3b82f6); border:0 }
+    .btn.small{ padding:6px 10px; font-size:13px }
+
+    .unit-toggle{
+      display:flex; border-radius:12px; overflow:hidden;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.06);
+    }
+    .unit-toggle button{
+      background:transparent; border:0; color:var(--text);
+      padding:8px 12px; cursor:pointer; font-weight:700; letter-spacing:.3px;
+    }
+    .unit-toggle button.active{
+      background:linear-gradient(135deg,#38bdf8,#3b82f6);
+      color:white;
+    }
+
+    .grid{
+      display:grid; grid-template-columns:1fr; gap:16px;
+    }
+    @media(min-width:780px){ .grid{ grid-template-columns:1.1fr .9fr } }
+
+    .card{
+      background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.03));
+      border:1px solid rgba(255,255,255,.12);
+      border-radius:16px; padding:16px;
+      box-shadow: 0 12px 30px rgba(0,0,0,.25), inset 0 0 20px rgba(255,255,255,.03);
+    }
+    .card h3{ margin:4px 0 12px; font-size:16px; color:#cbd5e1; font-weight:600 }
+    .location{
+      font-size:14px; color:var(--muted); margin-bottom:8px;
+    }
+    .current{
+      display:flex; align-items:center; gap:16px;
+    }
+    .wx-icon{
+      font-size:36px; line-height:1;
+      filter: drop-shadow(0 4px 10px rgba(0,0,0,.35));
+    }
+    .temp{
+      font-size:42px; font-weight:800;
+      letter-spacing:-1px;
+    }
+    .muted{ color:var(--muted) }
+
+    .meta{
+      display:flex; flex-wrap:wrap; gap:10px; margin-top:8px; color:#cbd5e1;
+      font-size:14px;
+    }
+    .chip{
+      background:rgba(255,255,255,.06); border:1px solid rgba(255,255,255,.12);
+      padding:6px 10px; border-radius:999px;
+    }
+
+    table{
+      width:100%; border-collapse:collapse; overflow:hidden; border-radius:12px;
+    }
+    thead th{
+      text-align:left; font-size:12px; color:#cbd5e1; font-weight:700;
+      padding:10px 12px; letter-spacing:.4px;
+      background:rgba(255,255,255,.05);
+      border-bottom:1px solid rgba(255,255,255,.1);
+    }
+    tbody td{
+      padding:12px; border-bottom:1px dashed rgba(255,255,255,.08);
+      font-size:14px; color:#e5e7eb;
+    }
+    tbody tr:last-child td{ border-bottom:0 }
+    .td-icon{ width:40px }
+    .td-min{ color:#93c5fd }
+    .td-max{ color:#fca5a5 }
+    .footer-note{
+      margin-top:10px; color:var(--muted); font-size:12px;
+    }
+    .error{ color:#fecaca; margin-top:8px; font-size:14px }
   </style>
 </head>
 <body>
-  <div class="container py-5">
-    <h1 class="mb-4 text-center brand">Current Weather</h1>
-
-    <div class="row justify-content-center">
-      <div class="col-md-8 col-lg-6">
-        <div class="input-group mb-3">
-          <input id="cityInput" type="text" class="form-control" placeholder="Enter city (e.g., London)" aria-label="City name" />
-          <button id="fetchBtn" class="btn btn-primary" type="button">Get Weather</button>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <div class="logo">WX</div>
+        Weather Dashboard
+      </div>
+      <div class="controls">
+        <div class="search">
+          <input id="cityInput" type="text" placeholder="Search city (e.g., Berlin)" aria-label="City" />
+          <button id="searchBtn" class="btn small">Search</button>
+          <button id="geoBtn" class="btn small" title="Use my location">Use my location</button>
         </div>
+        <div class="unit-toggle" role="group" aria-label="Temperature unit">
+          <button id="cBtn" class="active" aria-pressed="true">°C</button>
+          <button id="fBtn" aria-pressed="false">°F</button>
+        </div>
+      </div>
+    </header>
 
-        <div id="alert" class="alert alert-danger d-none" role="alert"></div>
-
-        <div id="resultCard" class="card d-none">
-          <div class="card-body">
-            <h5 id="place" class="card-title mb-3"></h5>
-
-            <div class="d-flex flex-wrap gap-4">
-              <div>
-                <div class="text-muted">Temperature</div>
-                <div class="fs-3 fw-semibold"><span id="temp">—</span> °C</div>
-              </div>
-              <div>
-                <div class="text-muted">Humidity</div>
-                <div class="fs-3 fw-semibold"><span id="humidity">—</span> %</div>
-              </div>
+    <div class="grid">
+      <section class="card" aria-live="polite">
+        <div class="location" id="locationName">—</div>
+        <div class="current">
+          <div class="wx-icon" id="currentIcon">⛅</div>
+          <div>
+            <div class="temp" id="currentTemp">--°</div>
+            <div class="muted" id="currentDesc">Loading...</div>
+            <div class="meta">
+              <div class="chip" id="currentWind">Wind: --</div>
+              <div class="chip" id="currentTime">--:--</div>
             </div>
-
-            <div id="asOf" class="mt-3 text-muted small"></div>
           </div>
         </div>
+        <div class="error" id="errorMsg" aria-live="assertive"></div>
+      </section>
 
-        <p class="text-muted mt-3 small">
-          Powered by Open-Meteo (no API key required).
-        </p>
-      </div>
+      <section class="card">
+        <h3>3-Day Forecast</h3>
+        <table aria-describedby="forecastHelp">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th class="td-icon">Icon</th>
+              <th>Conditions</th>
+              <th class="td-min">Min</th>
+              <th class="td-max">Max</th>
+            </tr>
+          </thead>
+          <tbody id="forecastBody">
+            <tr><td colspan="5" class="muted">No data yet</td></tr>
+          </tbody>
+        </table>
+        <div id="forecastHelp" class="footer-note">Showing the next 3 days.</div>
+      </section>
     </div>
   </div>
 
   <script>
-    const geocodeBase = "https://geocoding-api.open-meteo.com/v1/search";
-    const weatherBase = "https://api.open-meteo.com/v1/forecast";
+    const state = {
+      unit: 'C', // 'C' or 'F'
+      last: null // will hold normalized data in Celsius
+    };
 
-    const cityInput = document.getElementById("cityInput");
-    const fetchBtn = document.getElementById("fetchBtn");
-    const alertBox = document.getElementById("alert");
-    const resultCard = document.getElementById("resultCard");
-    const placeEl = document.getElementById("place");
-    const tempEl = document.getElementById("temp");
-    const humidityEl = document.getElementById("humidity");
-    const asOfEl = document.getElementById("asOf");
+    const el = {
+      locationName: document.getElementById('locationName'),
+      currentIcon: document.getElementById('currentIcon'),
+      currentTemp: document.getElementById('currentTemp'),
+      currentDesc: document.getElementById('currentDesc'),
+      currentWind: document.getElementById('currentWind'),
+      currentTime: document.getElementById('currentTime'),
+      forecastBody: document.getElementById('forecastBody'),
+      error: document.getElementById('errorMsg'),
+      cBtn: document.getElementById('cBtn'),
+      fBtn: document.getElementById('fBtn'),
+      cityInput: document.getElementById('cityInput'),
+      searchBtn: document.getElementById('searchBtn'),
+      geoBtn: document.getElementById('geoBtn')
+    };
 
-    function setLoading(isLoading) {
-      fetchBtn.disabled = isLoading;
-      fetchBtn.textContent = isLoading ? "Loading..." : "Get Weather";
+    // Weather code to icon and description
+    function wxIcon(code, isDay = true){
+      // Map WMO codes to emoji
+      if (code === 0) return '☀️';
+      if ([1,2].includes(code)) return isDay ? '🌤️' : '🌥️';
+      if (code === 3) return '☁️';
+      if ([45,48].includes(code)) return '🌫️';
+      if ([51,53,55,56,57].includes(code)) return '🌦️';
+      if ([61,63,65,66,67,80,81,82].includes(code)) return '🌧️';
+      if ([71,73,75,77,85,86].includes(code)) return '❄️';
+      if ([95,96,99].includes(code)) return '⛈️';
+      return '🌡️';
+    }
+    function wxText(code){
+      const map = {
+        0:'Clear sky',
+        1:'Mainly clear',
+        2:'Partly cloudy',
+        3:'Overcast',
+        45:'Fog',
+        48:'Depositing rime fog',
+        51:'Light drizzle',
+        53:'Moderate drizzle',
+        55:'Dense drizzle',
+        56:'Freezing drizzle',
+        57:'Freezing drizzle',
+        61:'Light rain',
+        63:'Moderate rain',
+        65:'Heavy rain',
+        66:'Freezing rain',
+        67:'Freezing rain',
+        71:'Light snow',
+        73:'Moderate snow',
+        75:'Heavy snow',
+        77:'Snow grains',
+        80:'Light showers',
+        81:'Moderate showers',
+        82:'Violent showers',
+        85:'Snow showers',
+        86:'Snow showers',
+        95:'Thunderstorm',
+        96:'Thunderstorm w/ hail',
+        99:'Thunderstorm w/ hail'
+      };
+      return map[code] || 'Unknown';
     }
 
-    function showError(msg) {
-      alertBox.textContent = msg;
-      alertBox.classList.remove("d-none");
-      resultCard.classList.add("d-none");
+    function toF(c){ return c * 9/5 + 32; }
+    function fmtTemp(c){
+      const val = state.unit === 'C' ? c : toF(c);
+      const unit = state.unit === 'C' ? '°C' : '°F';
+      return `${Math.round(val)}${unit}`;
+    }
+    function fmtWind(kmh){
+      // keep wind in km/h to keep UI simple
+      return `${Math.round(kmh)} km/h`;
+    }
+    function fmtDate(dStr){
+      const d = new Date(dStr);
+      return d.toLocaleDateString(undefined, { weekday:'short', month:'short', day:'numeric' });
+    }
+    function fmtTime(dStr){
+      const d = new Date(dStr);
+      return d.toLocaleString(undefined, { hour:'2-digit', minute:'2-digit' });
     }
 
-    function clearError() {
-      alertBox.classList.add("d-none");
-      alertBox.textContent = "";
-    }
-
-    async function geocodeCity(city) {
-      const url = `${geocodeBase}?name=${encodeURIComponent(city)}&count=1&language=en&format=json`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("Geocoding service unavailable.");
+    async function geocodeCity(q){
+      const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&limit=1&addressdetails=1`;
+      const res = await fetch(url, { headers: { 'Accept':'application/json' }});
+      if(!res.ok) throw new Error('Geocoding failed');
       const data = await res.json();
-      if (!data.results || data.results.length === 0) {
-        throw new Error("City not found. Try a different name or add country (e.g., Paris, FR).");
+      if(!data || !data.length) throw new Error('Location not found');
+      const item = data[0];
+      return {
+        name: formatPlaceName(item),
+        lat: parseFloat(item.lat),
+        lon: parseFloat(item.lon)
+      };
+    }
+    function formatPlaceName(item){
+      const a = item.address || {};
+      const parts = [
+        a.city || a.town || a.village || item.display_name?.split(',')[0],
+        a.state,
+        a.country_code ? a.country_code.toUpperCase() : a.country
+      ].filter(Boolean);
+      return parts.join(', ');
+    }
+
+    async function fetchWeather(lat, lon){
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+        `&current_weather=true&daily=weathercode,temperature_2m_max,temperature_2m_min&timezone=auto`;
+      const res = await fetch(url);
+      if(!res.ok) throw new Error('Weather fetch failed');
+      const data = await res.json();
+
+      const current = data.current_weather || {};
+      const daily = data.daily || {};
+      // Normalize in Celsius
+      const dailyItems = (daily.time || []).map((t, i) => ({
+        date: t,
+        code: (daily.weathercode || [])[i],
+        maxC: (daily.temperature_2m_max || [])[i],
+        minC: (daily.temperature_2m_min || [])[i]
+      }));
+
+      return {
+        current: {
+          tempC: current.temperature,
+          code: current.weathercode,
+          windKmh: current.windspeed,
+          isDay: current.is_day === 1,
+          time: current.time
+        },
+        daily: dailyItems
+      };
+    }
+
+    function pickNext3Days(daily){
+      const todayStr = new Date().toISOString().slice(0,10);
+      const afterToday = daily.filter(d => d.date > todayStr);
+      return afterToday.slice(0,3);
+    }
+
+    function render(){
+      const data = state.last;
+      if(!data){ return; }
+
+      // Header/location
+      el.locationName.textContent = data.place || `${data.lat.toFixed(2)}, ${data.lon.toFixed(2)}`;
+
+      // Current
+      el.currentIcon.textContent = wxIcon(data.current.code, data.current.isDay);
+      el.currentTemp.textContent = fmtTemp(data.current.tempC);
+      el.currentDesc.textContent = wxText(data.current.code);
+      el.currentWind.textContent = `Wind: ${fmtWind(data.current.windKmh)}`;
+      el.currentTime.textContent = `Updated: ${fmtTime(data.current.time)}`;
+
+      // Forecast
+      const rows = data.next3.map(d => {
+        return `
+          <tr>
+            <td>${fmtDate(d.date)}</td>
+            <td class="td-icon" aria-hidden="true">${wxIcon(d.code, true)}</td>
+            <td>${wxText(d.code)}</td>
+            <td class="td-min">${fmtTemp(d.minC)}</td>
+            <td class="td-max">${fmtTemp(d.maxC)}</td>
+          </tr>
+        `;
+      }).join('');
+      el.forecastBody.innerHTML = rows || `<tr><td colspan="5" class="muted">No forecast available</td></tr>`;
+    }
+
+    function setUnit(u){
+      state.unit = u;
+      el.cBtn.classList.toggle('active', u === 'C');
+      el.fBtn.classList.toggle('active', u === 'F');
+      el.cBtn.setAttribute('aria-pressed', u === 'C');
+      el.fBtn.setAttribute('aria-pressed', u === 'F');
+      render();
+    }
+
+    async function updateForLocation({ name, lat, lon }){
+      try{
+        el.error.textContent = '';
+        const wx = await fetchWeather(lat, lon);
+        const next3 = pickNext3Days(wx.daily);
+        state.last = { place: name, lat, lon, ...wx, next3 };
+        render();
+      }catch(err){
+        console.error(err);
+        el.error.textContent = 'Failed to load weather data. Try another location.';
       }
-      const r = data.results[0];
-      return {
-        name: r.name,
-        country: r.country || "",
-        admin1: r.admin1 || "",
-        lat: r.latitude,
-        lon: r.longitude
-      };
     }
 
-    async function fetchWeather(lat, lon) {
-      const params = new URLSearchParams({
-        latitude: lat,
-        longitude: lon,
-        current: "temperature_2m,relative_humidity_2m",
-        timezone: "auto"
-      });
-      const url = `${weatherBase}?${params.toString()}`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error("Weather service unavailable.");
-      const data = await res.json();
-      if (!data.current) throw new Error("No current weather data available.");
-      return {
-        temperature: data.current.temperature_2m,
-        humidity: data.current.relative_humidity_2m,
-        time: data.current.time
-      };
-    }
-
-    function updateUI(placeInfo, weather) {
-      const locationParts = [placeInfo.name, placeInfo.admin1, placeInfo.country]
-        .filter(Boolean)
-        .join(", ");
-      placeEl.textContent = locationParts;
-
-      tempEl.textContent = typeof weather.temperature === "number" ? weather.temperature.toFixed(1) : "—";
-      humidityEl.textContent = typeof weather.humidity === "number" ? Math.round(weather.humidity) : "—";
-
-      const asOfDate = weather.time ? new Date(weather.time) : null;
-      asOfEl.textContent = asOfDate ? `As of ${asOfDate.toLocaleString()}` : "";
-
-      resultCard.classList.remove("d-none");
-    }
-
-    async function handleSearch() {
-      const city = cityInput.value.trim();
-      clearError();
-      resultCard.classList.add("d-none");
-
-      if (!city) {
-        showError("Please enter a city name.");
+    // Event bindings
+    el.searchBtn.addEventListener('click', async () => {
+      const q = el.cityInput.value.trim();
+      if(!q) return;
+      try{
+        el.error.textContent = '';
+        const loc = await geocodeCity(q);
+        updateForLocation(loc);
+      }catch(err){
+        console.error(err);
+        el.error.textContent = 'City not found. Please try another.';
+      }
+    });
+    el.cityInput.addEventListener('keydown', e => {
+      if(e.key === 'Enter') el.searchBtn.click();
+    });
+    el.geoBtn.addEventListener('click', () => {
+      if(!navigator.geolocation){
+        el.error.textContent = 'Geolocation is not supported in this browser.';
         return;
       }
+      el.error.textContent = 'Detecting your location...';
+      navigator.geolocation.getCurrentPosition(async pos => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        // Reverse geocode a friendly name
+        try{
+          const rev = await reverseGeocode(lat, lon);
+          updateForLocation({ name: rev, lat, lon });
+        }catch{
+          updateForLocation({ name: `Your location`, lat, lon });
+        }
+      }, err => {
+        el.error.textContent = 'Unable to access location. Please allow permission or search manually.';
+      }, { enableHighAccuracy:true, timeout:10000 });
+    });
 
-      try {
-        setLoading(true);
-        const place = await geocodeCity(city);
-        const weather = await fetchWeather(place.lat, place.lon);
-        updateUI(place, weather);
-      } catch (err) {
-        showError(err.message || "Something went wrong.");
-      } finally {
-        setLoading(false);
-      }
+    el.cBtn.addEventListener('click', () => setUnit('C'));
+    el.fBtn.addEventListener('click', () => setUnit('F'));
+
+    async function reverseGeocode(lat, lon){
+      const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`;
+      const res = await fetch(url);
+      if(!res.ok) throw new Error('Reverse geocode failed');
+      const data = await res.json();
+      return formatPlaceName({ address: data.address, display_name: data.display_name });
     }
 
-    fetchBtn.addEventListener("click", handleSearch);
-    cityInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") handleSearch();
-    });
+    // Initialize
+    (async function init(){
+      // Try geolocation first; fall back to a default city
+      if(navigator.geolocation){
+        navigator.geolocation.getCurrentPosition(async pos => {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+          try{
+            const rev = await reverseGeocode(lat, lon);
+            updateForLocation({ name: rev, lat, lon });
+          }catch{
+            updateForLocation({ name: `Your location`, lat, lon });
+          }
+        }, async () => {
+          // Default location
+          const def = await geocodeCity('New York, USA').catch(()=>({ name:'New York, USA', lat:40.7128, lon:-74.0060 }));
+          updateForLocation(def);
+        }, { timeout: 6000 });
+      }else{
+        const def = await geocodeCity('New York, USA').catch(()=>({ name:'New York, USA', lat:40.7128, lon:-74.0060 }));
+        updateForLocation(def);
+      }
+    })();
   </script>
 </body>
 </html>
