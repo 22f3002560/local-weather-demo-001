@@ -1,24 +1,18 @@
-# City Weather (Open-Meteo)
+# Weather Dashboard
 
 ## Overview
-A minimal, client-side web page that fetches the current temperature and humidity for a city using the Open-Meteo Geocoding API and Forecast API. No API key required. Styled with Bootstrap 5.
+A lightweight weather dashboard that shows current conditions and a 3-day forecast for any city. No API keys required (uses Open-Meteo and OpenStreetMap/Nominatim). Includes a Celsius/Fahrenheit toggle and small weather icons.
 
 ## Setup
-- No build or server required.
+- Download the repository contents.
 - Open index.html in any modern browser.
 
 ## Usage
-- Enter a city name (optionally include country or state, e.g., “Portland, US”).
-- Click “Get Weather” or press Enter.
-- The page displays current temperature (°C) and relative humidity (%).
+- Search for a city or click “Use my location”.
+- Toggle units between °C and °F using the switch.
+- View current weather (icon, temperature, wind, updated time) and the 3-day forecast table below.
 
-## License
-MIT License
-
-Copyright (c) 2025
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+## Improvements in Round 2
+- Added a 3-day forecast section below current weather.
+- Implemented a temperature unit toggle (Celsius/Fahrenheit).
+- Displayed small weather icons for both current conditions and forecast.
